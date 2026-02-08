@@ -2,6 +2,25 @@
 
 A beautiful, interactive Valentine's experience with dynamic features and Stranger Things aesthetic.
 
+**🎓 Also an Educational Resource**: This repository is designed as an advanced web development tutorial. Learn modern HTML, CSS, and JavaScript by studying a real, production-ready project!
+
+---
+
+## 🎯 Learning Objectives
+
+By studying this project, you'll learn:
+- ✅ Modern JavaScript (ES6+, Async/Await, Fetch API)
+- ✅ Advanced CSS (Custom Properties, Flexbox, Animations, Glassmorphism)
+- ✅ API Integration (REST APIs, Error Handling, State Management)
+- ✅ Performance Optimization (RequestAnimationFrame, Debouncing)
+- ✅ Testing Strategies (Unit Tests, Integration Tests)
+- ✅ Best Practices (Code Organization, Accessibility, Security)
+
+**📚 Learning Resources**:
+- **LEARNING-GUIDE.md** - Comprehensive tutorials and explanations
+- **CODE-EXPLAINED.md** - Line-by-line code breakdown
+- **DOCUMENTATION.md** - Technical reference and architecture
+
 ---
 
 ## 🌟 Features
