@@ -10,22 +10,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Shadows+Into+Light&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- Stranger Things floating particles -->
-    <div class="particles" id="particles"></div>
-    <!-- Floating emojis — flowers, chocolates, food, hearts -->
-    <div class="floating-emojis" id="floatingEmojis"></div>
-    <!-- Christmas lights wire -->
+<body data-theme="night" data-mood="romantic">
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="heart-loader" id="heartLoader"></div>
+        <div class="loading-text" id="loadingText">Preparing something special...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <!-- Cursor Trail -->
+    <canvas id="cursorCanvas"></canvas>
+    
+    <!-- Click Hearts Container -->
+    <div class="click-hearts" id="clickHearts"></div>
+    
+    <!-- Parallax Layers -->
+    <div class="parallax-bg" data-speed="0.2"></div>
+    <div class="particles" id="particles" data-speed="0.5"></div>
+    <div class="floating-emojis" id="floatingEmojis" data-speed="0.7"></div>
     <div class="christmas-lights" id="christmasLights"></div>
 
-    <div class="container">
+    <!-- Controls Panel -->
+    <div class="controls-panel" id="controlsPanel">
+        <button class="control-btn" id="themeToggle" title="Toggle Day/Night">🌙</button>
+        <button class="control-btn" id="moodToggle" title="Change Mood">💕</button>
+        <button class="control-btn" id="textSizeToggle" title="Text Size">A</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContainer" data-speed="1">
         <div class="game-screen" id="gameScreen">
             <div class="lights"></div>
             <h1 class="title" id="title">Loading...</h1>
+            <div class="daily-note" id="dailyNote"></div>
             <div class="content" id="content"></div>
             <div class="choices" id="choices"></div>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

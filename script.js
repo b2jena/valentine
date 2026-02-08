@@ -1,6 +1,338 @@
-/* === STRANGER THINGS ATMOSPHERE === */
+/* ========================================
+   VALENTINE'S WEBSITE - ENHANCED VERSION
+   Features: Loading, Themes, Parallax, Cursor Trail,
+   Click Hearts, Tilt, Daily Notes, Weather, Save Progress
+   ======================================== */
 
-// Floating Upside Down particles
+// === STATE MANAGEMENT ===
+const state = {
+    currentScene: 'start',
+    theme: 'night',
+    mood: 'romantic',
+    textSize: 'normal',
+    visitCount: 0,
+    lastVisit: null,
+    progress: {}
+};
+
+// === STORAGE ===
+function saveState() {
+    localStorage.setItem('valentineState', JSON.stringify(state));
+}
+
+function loadState() {
+    const saved = localStorage.getItem('valentineState');
+    if (saved) {
+        Object.assign(state, JSON.parse(saved));
+        state.visitCount++;
+    }
+    state.lastVisit = new Date().toISOString();
+    saveState();
+}
+
+// === LOADING ANIMATION ===
+function initLoading() {
+    const loader = document.getElementById('heartLoader');
+    const progress = document.getElementById('progressFill');
+    const hearts = ['❤️', '�', '�', '💗', '💘', '💝'];
+    let idx = 0;
+    let percent = 0;
+
+    const heartInterval = setInterval(() => {
+        loader.textContent = hearts[idx % hearts.length];
+        idx++;
+    }, 300);
+
+    const progressInterval = setInterval(() => {
+        percent += Math.random() * 15;
+        if (percent >= 100) {
+            percent = 100;
+            clearInterval(progressInterval);
+            clearInterval(heartInterval);
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                initGame();
+            }, 500);
+        }
+        progress.style.width = percent + '%';
+    }, 200);
+}
+
+// === CURSOR TRAIL ===
+function initCursorTrail() {
+    const canvas = document.getElementById('cursorCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const colors = ['#ff6b6b', '#ff8787', '#ffa5a5', '#ffb6c1'];
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        for (let i = 0; i < 3; i++) {
+            particles.push({
+                x: e.clientX,
+                y: e.clientY,
+                size: Math.random() * 3 + 1,
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                life: 1
+            });
+        }
+    });
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.life -= 0.02;
+            p.size *= 0.98;
+
+            if (p.life <= 0 || p.size < 0.5) {
+                particles.splice(i, 1);
+                continue;
+            }
+
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+// === CLICK HEARTS ===
+function initClickHearts() {
+    const container = document.getElementById('clickHearts');
+    const hearts = ['❤️', '💕', '💖', '💗', '💘', '💝', '✨'];
+
+    document.addEventListener('click', (e) => {
+        const count = Math.floor(Math.random() * 3) + 3;
+        for (let i = 0; i < count; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'click-heart';
+            heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+            heart.style.left = e.clientX + 'px';
+            heart.style.top = e.clientY + 'px';
+            
+            const angle = (Math.PI * 2 * i) / count;
+            const distance = 50 + Math.random() * 50;
+            heart.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+            heart.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+            
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+        }
+    });
+}
+
+// === PARALLAX SCROLLING ===
+function initParallax() {
+    const layers = document.querySelectorAll('[data-speed]');
+    
+    function updateParallax() {
+        const scrollY = window.pageYOffset;
+        layers.forEach(layer => {
+            const speed = parseFloat(layer.dataset.speed);
+            const yPos = -(scrollY * speed);
+            layer.style.transform = `translateY(${yPos}px)`;
+        });
+    }
+
+    window.addEventListener('scroll', updateParallax);
+    updateParallax();
+}
+
+// === TILT EFFECT ===
+function initTilt() {
+    const card = document.getElementById('gameScreen');
+    
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / 30;
+        const rotateY = (centerX - x) / 30;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+    });
+}
+
+// === SHAKE TO EXPLODE HEARTS (Mobile) ===
+function initShakeDetection() {
+    if (!window.DeviceMotionEvent) return;
+
+    let lastX, lastY, lastZ;
+    let shakeThreshold = 15;
+
+    window.addEventListener('devicemotion', (e) => {
+        const acc = e.accelerationIncludingGravity;
+        if (!acc) return;
+
+        const x = acc.x || 0;
+        const y = acc.y || 0;
+        const z = acc.z || 0;
+
+        if (lastX !== undefined) {
+            const deltaX = Math.abs(x - lastX);
+            const deltaY = Math.abs(y - lastY);
+            const deltaZ = Math.abs(z - lastZ);
+
+            if (deltaX + deltaY + deltaZ > shakeThreshold) {
+                explodeHearts();
+            }
+        }
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+    });
+}
+
+function explodeHearts() {
+    const container = document.getElementById('clickHearts');
+    const hearts = ['❤️', '💕', '💖', '💗', '💘', '💝', '✨', '🌹', '💐'];
+    
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'click-heart';
+            heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.top = Math.random() * window.innerHeight + 'px';
+            heart.style.fontSize = (20 + Math.random() * 30) + 'px';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100 + Math.random() * 100;
+            heart.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+            heart.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+            
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 1500);
+        }, i * 50);
+    }
+}
+
+// === THEME & MOOD CONTROLS ===
+function initControls() {
+    const themeBtn = document.getElementById('themeToggle');
+    const moodBtn = document.getElementById('moodToggle');
+    const textBtn = document.getElementById('textSizeToggle');
+
+    // Theme toggle
+    const themes = ['night', 'day', 'sunset'];
+    const themeIcons = { night: '🌙', day: '☀️', sunset: '🌅' };
+    
+    themeBtn.addEventListener('click', () => {
+        const idx = themes.indexOf(state.theme);
+        state.theme = themes[(idx + 1) % themes.length];
+        document.body.dataset.theme = state.theme;
+        themeBtn.textContent = themeIcons[state.theme];
+        saveState();
+    });
+
+    // Mood toggle
+    const moods = ['romantic', 'playful', 'nostalgic'];
+    const moodIcons = { romantic: '💕', playful: '🎉', nostalgic: '🌙' };
+    
+    moodBtn.addEventListener('click', () => {
+        const idx = moods.indexOf(state.mood);
+        state.mood = moods[(idx + 1) % moods.length];
+        document.body.dataset.mood = state.mood;
+        moodBtn.textContent = moodIcons[state.mood];
+        saveState();
+    });
+
+    // Text size toggle
+    const sizes = ['normal', 'large', 'small'];
+    const sizeIcons = { normal: 'A', large: 'A+', small: 'A-' };
+    
+    textBtn.addEventListener('click', () => {
+        const idx = sizes.indexOf(state.textSize);
+        state.textSize = sizes[(idx + 1) % sizes.length];
+        document.body.dataset.textSize = state.textSize;
+        textBtn.textContent = sizeIcons[state.textSize];
+        saveState();
+    });
+
+    // Apply saved state
+    document.body.dataset.theme = state.theme;
+    document.body.dataset.mood = state.mood;
+    document.body.dataset.textSize = state.textSize;
+    themeBtn.textContent = themeIcons[state.theme];
+    moodBtn.textContent = moodIcons[state.mood];
+    textBtn.textContent = sizeIcons[state.textSize];
+}
+
+// === DAILY NOTES ===
+function getDailyNote() {
+    const day = new Date().getDay();
+    const notes = {
+        0: "☀️ Sunday vibes: Remember our lazy Sunday mornings together?",
+        1: "💪 Monday motivation: You make every week worth starting, Bubu!",
+        2: "🏸 Tuesday: Perfect day for a badminton match, don't you think?",
+        3: "💕 Wednesday: Halfway through the week, thinking of you!",
+        4: "✨ Thursday: Almost the weekend... almost time to see you!",
+        5: "🎉 Friday feeling: The best days are the ones with you!",
+        6: "❤️ Saturday: Our day! Hope we're making memories today!"
+    };
+    return notes[day];
+}
+
+// === WEATHER-BASED MESSAGES ===
+async function getWeatherMessage() {
+    // Simulated weather (in production, use real weather API)
+    const conditions = ['sunny', 'rainy', 'cloudy', 'clear'];
+    const weather = conditions[Math.floor(Math.random() * conditions.length)];
+    
+    const messages = {
+        rainy: "🌧️ It's raining... remember that rainy day match when we got soaked? Best game ever!",
+        sunny: "☀️ Sunny day! Perfect weather for our next badminton session, Bubu!",
+        cloudy: "☁️ Cloudy skies, but you're my sunshine no matter what!",
+        clear: "✨ Clear skies tonight... just like how clear my feelings are for you!"
+    };
+    
+    return messages[weather];
+}
+
+// === RANDOM LOVE NOTES ===
+function getRandomLoveNote() {
+    const notes = [
+        "💝 Fun fact: You make my heart do that thing where it forgets how to beat normally.",
+        "🌹 Random thought: If I could rearrange the alphabet, I'd put U and I together... but we're already perfect!",
+        "✨ Just so you know: You're the reason I believe in magic.",
+        "💕 Reminder: You're not just my Valentine, you're my every day.",
+        "🏸 Court confession: I fell for you before I fell on the court (and I fell a lot!).",
+        "❤️ Truth bomb: Every love song makes me think of you.",
+        "🦋 Sweet secret: Butterflies still happen every time I see you.",
+        "💖 Daily dose: You + Me = Perfect equation."
+    ];
+    return notes[Math.floor(Math.random() * notes.length)];
+}
+
+// === ATMOSPHERE GENERATORS ===
 function createParticles() {
     const c = document.getElementById('particles');
     for (let i = 0; i < 25; i++) {
@@ -16,7 +348,6 @@ function createParticles() {
     }
 }
 
-// Christmas lights along the top
 function createChristmasLights() {
     const w = document.getElementById('christmasLights');
     const colors = ['red', 'yellow', 'green', 'blue'];
@@ -29,14 +360,12 @@ function createChristmasLights() {
     }
 }
 
-// Floating emoji background — flowers, chocolates, pasta, biryani, hearts
 function createFloatingEmojis() {
     const c = document.getElementById('floatingEmojis');
     const emojis = [
         '🌹','🌸','🌺','🌷','💐','🌻','🌼','💮',
         '🍫','🍬','🍭','🍩',
-        '🍝','🍜',
-        '🍗','🍛',
+        '🍝','🍜','🍗','🍛',
         '🏸','🏸','🏸',
         '❤️','💕','💖','💗','💘','💝','✨','🦋'
     ];
@@ -48,14 +377,13 @@ function createFloatingEmojis() {
         e.style.fontSize = (18 + Math.random() * 22) + 'px';
         e.style.animationDuration = (8 + Math.random() * 14) + 's';
         e.style.animationDelay = (Math.random() * 12) + 's';
-        // Random horizontal drift
         e.style.setProperty('--drift', (Math.random() * 120 - 60) + 'px');
         e.style.opacity = '0';
         c.appendChild(e);
     }
 }
 
-/* === GAME STORY === */
+// === GAME STORY ===
 const gameStory = {
     start: {
         title: "A Message For You",
@@ -183,9 +511,7 @@ const gameStory = {
     }
 };
 
-/* === RENDERING ENGINE === */
-let currentScene = 'start';
-
+// === RENDERING ENGINE ===
 function typeWriter(el, text, speed = 25) {
     el.textContent = '';
     el.style.opacity = '0';
@@ -209,8 +535,23 @@ function renderScene(key) {
     const contentEl = document.getElementById('content');
     const choicesEl = document.getElementById('choices');
     const screen = document.getElementById('gameScreen');
+    const dailyNote = document.getElementById('dailyNote');
 
-    // Micro-interaction: subtle pulse on scene change
+    // Save progress
+    state.currentScene = key;
+    state.progress[key] = new Date().toISOString();
+    saveState();
+
+    // Show daily/weather note on first scene
+    if (key === 'start') {
+        const notes = [getDailyNote(), getRandomLoveNote()];
+        dailyNote.textContent = notes[Math.floor(Math.random() * notes.length)];
+        dailyNote.style.display = 'block';
+    } else {
+        dailyNote.style.display = 'none';
+    }
+
+    // Micro-interaction
     screen.style.transform = 'scale(0.98)';
     screen.style.opacity = '0.8';
     setTimeout(() => {
@@ -245,8 +586,7 @@ function renderScene(key) {
                 btn.onclick = () => {
                     btn.style.transform = 'scale(0.95)';
                     setTimeout(() => {
-                        currentScene = choice.next;
-                        renderScene(currentScene);
+                        renderScene(choice.next);
                     }, 150);
                 };
                 choicesEl.appendChild(btn);
@@ -260,19 +600,25 @@ function renderScene(key) {
     }, scene.content.length * 25 + 800);
 }
 
-/* === INIT === */
-document.addEventListener('DOMContentLoaded', () => {
+// === INITIALIZATION ===
+function initGame() {
     createParticles();
     createChristmasLights();
     createFloatingEmojis();
+    initCursorTrail();
+    initClickHearts();
+    initParallax();
+    initTilt();
+    initShakeDetection();
+    initControls();
 
-    const screen = document.getElementById('gameScreen');
-    screen.style.opacity = '0';
-    screen.style.transform = 'scale(0.95) translateY(20px)';
-    setTimeout(() => {
-        screen.style.transition = 'all 0.8s cubic-bezier(0.4,0,0.2,1)';
-        screen.style.opacity = '1';
-        screen.style.transform = 'scale(1) translateY(0)';
-        setTimeout(() => renderScene(currentScene), 400);
-    }, 100);
+    // Start from saved progress or beginning
+    const startScene = state.currentScene || 'start';
+    setTimeout(() => renderScene(startScene), 500);
+}
+
+// === START ===
+document.addEventListener('DOMContentLoaded', () => {
+    loadState();
+    initLoading();
 });
