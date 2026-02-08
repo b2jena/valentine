@@ -350,6 +350,30 @@ function showNotification(message) {
     }, 2000);
 }
 
+// === INDIAN STANDARD TIME ===
+function getISTTime() {
+    const now = new Date();
+    const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    
+    const hours = istTime.getHours();
+    const minutes = istTime.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    
+    return `${displayHours}:${minutes} ${ampm} IST`;
+}
+
+function getTimeBasedGreeting() {
+    const now = new Date();
+    const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const hours = istTime.getHours();
+    
+    if (hours < 12) return "🌅 Good morning";
+    if (hours < 17) return "☀️ Good afternoon";
+    if (hours < 21) return "🌆 Good evening";
+    return "🌙 Good night";
+}
+
 // === DAILY NOTES ===
 function getDailyNote() {
     const day = new Date().getDay();
@@ -365,20 +389,95 @@ function getDailyNote() {
     return notes[day];
 }
 
-// === WEATHER-BASED MESSAGES ===
+// === WEATHER API INTEGRATION ===
+const WEATHER_CONFIG = {
+    city: 'Bangalore',
+    location: 'Manyata Tech Park',
+    lat: 13.0358,
+    lon: 77.6194
+};
+
+let weatherData = {
+    temp: null,
+    condition: 'clear',
+    description: '',
+    lastUpdated: null
+};
+
+async function fetchBengaluruWeather() {
+    try {
+        // Using Open-Meteo API (free, no API key required)
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_CONFIG.lat}&longitude=${WEATHER_CONFIG.lon}&current=temperature_2m,weather_code&timezone=Asia/Kolkata`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.current) {
+            weatherData.temp = Math.round(data.current.temperature_2m);
+            weatherData.condition = getWeatherCondition(data.current.weather_code);
+            weatherData.lastUpdated = new Date();
+            
+            // Update background based on weather
+            updateBackgroundForWeather(weatherData.condition);
+            
+            return weatherData;
+        }
+    } catch (error) {
+        console.log('Weather fetch failed, using default');
+    }
+    return weatherData;
+}
+
+function getWeatherCondition(code) {
+    // WMO Weather interpretation codes
+    if (code === 0) return 'clear';
+    if (code >= 95) return 'stormy';
+    if (code >= 71 && code <= 77) return 'snowy';
+    if (code <= 3) return 'cloudy';
+    if (code <= 67 || code >= 80) return 'rainy';
+    return 'cloudy';
+}
+
+function updateBackgroundForWeather(condition) {
+    const body = document.body;
+    body.setAttribute('data-weather', condition);
+}
+
 async function getWeatherMessage() {
-    // Simulated weather (in production, use real weather API)
-    const conditions = ['sunny', 'rainy', 'cloudy', 'clear'];
-    const weather = conditions[Math.floor(Math.random() * conditions.length)];
+    await fetchBengaluruWeather();
     
     const messages = {
-        rainy: "🌧️ It's raining... remember that rainy day match when we got soaked? Best game ever!",
-        sunny: "☀️ Sunny day! Perfect weather for our next badminton session, Bubu!",
-        cloudy: "☁️ Cloudy skies, but you're my sunshine no matter what!",
-        clear: "✨ Clear skies tonight... just like how clear my feelings are for you!"
+        rainy: "🌧️ It's raining in Bengaluru... remember that rainy day match when we got soaked? Best game ever!",
+        sunny: "☀️ Sunny day at Manyata! Perfect weather for our next badminton session, Bubu!",
+        cloudy: "☁️ Cloudy skies over Bengaluru, but you're my sunshine no matter what!",
+        clear: "✨ Clear skies in Bangalore tonight... just like how clear my feelings are for you!",
+        stormy: "⛈️ Stormy weather outside, but with you, I feel safe and warm!",
+        snowy: "❄️ Cool weather in Bengaluru... perfect for warm cuddles!"
     };
     
-    return messages[weather];
+    return messages[weatherData.condition] || messages.clear;
+}
+
+// === MOTIVATIONAL QUOTES ===
+function getMotivationalQuote() {
+    const quotes = [
+        "💪 'The only way to do great work is to love what you do.' - Keep shining, Bubu!",
+        "✨ 'Believe you can and you're halfway there.' - You've got this, my love!",
+        "🌟 'Every day is a new beginning.' - Make today amazing, Aradhana!",
+        "💖 'You are stronger than you think.' - I believe in you always!",
+        "🎯 'Dream big, work hard, stay focused.' - You inspire me every day!",
+        "🌈 'Your potential is endless.' - Go conquer the world, Bubu!",
+        "🚀 'Success is not final, failure is not fatal.' - Keep pushing forward!",
+        "💝 'Be the reason someone smiles today.' - You're already mine!",
+        "🏸 'Champions keep playing until they get it right.' - Just like us on court!",
+        "⭐ 'You are capable of amazing things.' - Never forget that, my love!",
+        "🌸 'Bloom where you are planted.' - You make everywhere beautiful!",
+        "💕 'Your vibe attracts your tribe.' - And you attracted me perfectly!",
+        "🎨 'Create the life you can't wait to wake up to.' - Let's do it together!",
+        "🌺 'Be yourself; everyone else is taken.' - And you're perfect as you are!",
+        "✨ 'Small steps every day lead to big changes.' - Proud of you always!"
+    ];
+    return quotes[Math.floor(Math.random() * quotes.length)];
 }
 
 // === RANDOM LOVE NOTES ===
@@ -608,8 +707,9 @@ function renderScene(key) {
 
     // Show daily/weather note on first scene
     if (key === 'start') {
-        const notes = [getDailyNote(), getRandomLoveNote()];
-        dailyNote.textContent = notes[Math.floor(Math.random() * notes.length)];
+        const noteOptions = [getDailyNote(), getRandomLoveNote(), getMotivationalQuote()];
+        const randomNote = noteOptions[Math.floor(Math.random() * noteOptions.length)];
+        dailyNote.textContent = randomNote;
         dailyNote.style.display = 'block';
     } else {
         dailyNote.style.display = 'none';
@@ -675,10 +775,61 @@ function initGame() {
     initTilt();
     initShakeDetection();
     initControls();
+    initWeatherWidget();
 
     // Start from saved progress or beginning
     const startScene = state.currentScene || 'start';
     setTimeout(() => renderScene(startScene), 500);
+}
+
+// === WEATHER WIDGET INITIALIZATION ===
+async function initWeatherWidget() {
+    const tempEl = document.getElementById('weatherTemp');
+    const conditionEl = document.getElementById('weatherCondition');
+    const timeEl = document.getElementById('weatherTime');
+    const greetingEl = document.getElementById('weatherGreeting');
+    
+    // Initial fetch
+    await fetchBengaluruWeather();
+    updateWeatherDisplay();
+    
+    // Update time every minute
+    setInterval(() => {
+        timeEl.textContent = getISTTime();
+        greetingEl.textContent = getTimeBasedGreeting() + ', Bubu!';
+    }, 60000);
+    
+    // Update weather every 10 minutes
+    setInterval(async () => {
+        await fetchBengaluruWeather();
+        updateWeatherDisplay();
+    }, 600000);
+    
+    // Initial time display
+    timeEl.textContent = getISTTime();
+    greetingEl.textContent = getTimeBasedGreeting() + ', Bubu!';
+}
+
+function updateWeatherDisplay() {
+    const tempEl = document.getElementById('weatherTemp');
+    const conditionEl = document.getElementById('weatherCondition');
+    
+    if (weatherData.temp !== null) {
+        tempEl.textContent = `${weatherData.temp}°C`;
+        
+        const conditionEmojis = {
+            clear: '☀️ Clear',
+            cloudy: '☁️ Cloudy',
+            rainy: '🌧️ Rainy',
+            stormy: '⛈️ Stormy',
+            snowy: '❄️ Cool'
+        };
+        
+        conditionEl.textContent = conditionEmojis[weatherData.condition] || '✨ Beautiful';
+    } else {
+        tempEl.textContent = '25°C';
+        conditionEl.textContent = '✨ Beautiful';
+    }
 }
 
 // === START ===
