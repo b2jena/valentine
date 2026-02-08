@@ -9,6 +9,7 @@ const state = {
     currentScene: 'start',
     theme: 'night',
     mood: 'romantic',
+    font: 'handwritten',
     textSize: 'normal',
     visitCount: 0,
     lastVisit: null,
@@ -239,6 +240,7 @@ function explodeHearts() {
 function initControls() {
     const themeBtn = document.getElementById('themeToggle');
     const moodBtn = document.getElementById('moodToggle');
+    const fontBtn = document.getElementById('fontToggle');
     const textBtn = document.getElementById('textSizeToggle');
 
     // Theme toggle
@@ -249,7 +251,7 @@ function initControls() {
         const idx = themes.indexOf(state.theme);
         state.theme = themes[(idx + 1) % themes.length];
         document.body.dataset.theme = state.theme;
-        themeBtn.textContent = themeIcons[state.theme];
+        themeBtn.querySelector('.btn-icon').textContent = themeIcons[state.theme];
         saveState();
     });
 
@@ -261,7 +263,27 @@ function initControls() {
         const idx = moods.indexOf(state.mood);
         state.mood = moods[(idx + 1) % moods.length];
         document.body.dataset.mood = state.mood;
-        moodBtn.textContent = moodIcons[state.mood];
+        moodBtn.querySelector('.btn-icon').textContent = moodIcons[state.mood];
+        saveState();
+    });
+
+    // Font toggle
+    const fonts = ['handwritten', 'elegant', 'modern'];
+    const fontIcons = { handwritten: '✍️', elegant: '🎭', modern: '🎯' };
+    const fontNames = { 
+        handwritten: 'Handwritten + Sans', 
+        elegant: 'Script + Serif', 
+        modern: 'Bold + Light' 
+    };
+    
+    fontBtn.addEventListener('click', () => {
+        const idx = fonts.indexOf(state.font);
+        state.font = fonts[(idx + 1) % fonts.length];
+        document.body.dataset.font = state.font;
+        fontBtn.querySelector('.btn-icon').textContent = fontIcons[state.font];
+        
+        // Show notification
+        showNotification(`Font: ${fontNames[state.font]}`);
         saveState();
     });
 
@@ -273,17 +295,59 @@ function initControls() {
         const idx = sizes.indexOf(state.textSize);
         state.textSize = sizes[(idx + 1) % sizes.length];
         document.body.dataset.textSize = state.textSize;
-        textBtn.textContent = sizeIcons[state.textSize];
+        textBtn.querySelector('.btn-icon').textContent = sizeIcons[state.textSize];
         saveState();
     });
 
     // Apply saved state
     document.body.dataset.theme = state.theme;
     document.body.dataset.mood = state.mood;
+    document.body.dataset.font = state.font;
     document.body.dataset.textSize = state.textSize;
-    themeBtn.textContent = themeIcons[state.theme];
-    moodBtn.textContent = moodIcons[state.mood];
-    textBtn.textContent = sizeIcons[state.textSize];
+    themeBtn.querySelector('.btn-icon').textContent = themeIcons[state.theme];
+    moodBtn.querySelector('.btn-icon').textContent = moodIcons[state.mood];
+    fontBtn.querySelector('.btn-icon').textContent = fontIcons[state.font];
+    textBtn.querySelector('.btn-icon').textContent = sizeIcons[state.textSize];
+}
+
+// === NOTIFICATION SYSTEM ===
+function showNotification(message) {
+    const existing = document.querySelector('.font-notification');
+    if (existing) existing.remove();
+
+    const notif = document.createElement('div');
+    notif.className = 'font-notification';
+    notif.textContent = message;
+    notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: rgba(180, 50, 50, 0.9);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-family: var(--font-button);
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 10001;
+        opacity: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    `;
+    document.body.appendChild(notif);
+
+    setTimeout(() => {
+        notif.style.opacity = '1';
+        notif.style.transform = 'translateX(-50%) translateY(0)';
+    }, 10);
+
+    setTimeout(() => {
+        notif.style.opacity = '0';
+        notif.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => notif.remove(), 300);
+    }, 2000);
 }
 
 // === DAILY NOTES ===

@@ -7,10 +7,29 @@
     --primary-color: #d42020;
     --bg-dark: #0a0a0a;
     --content-color: rgba(232, 213, 196, 0.95);
+    
+    /* Font Combination 1: Handwritten + Sans-serif (default) */
+    --font-title: 'Shadows Into Light', cursive;
+    --font-body: 'Caveat', cursive;
+    --font-button: 'Montserrat', sans-serif;
+}
+
+/* Font Combination 2: Script + Serif */
+body[data-font="elegant"] {
+    --font-title: 'Dancing Script', cursive;
+    --font-body: 'Playfair Display', serif;
+    --font-button: 'Playfair Display', serif;
+}
+
+/* Font Combination 3: Bold Display + Light Body */
+body[data-font="modern"] {
+    --font-title: 'Bebas Neue', sans-serif;
+    --font-body: 'Raleway', sans-serif;
+    --font-button: 'Raleway', sans-serif;
 }
 
 body {
-    font-family: 'Caveat', cursive;
+    font-family: var(--font-body);
     font-weight: 500;
     background: var(--bg-dark);
     color: var(--content-color);
@@ -23,7 +42,7 @@ body {
     padding: 20px;
     position: relative;
     cursor: none;
-    transition: background 1s ease, color 0.5s ease;
+    transition: background 1s ease, color 0.5s ease, font-family 0.5s ease;
 }
 
 /* === LOADING SCREEN === */
@@ -292,30 +311,102 @@ body::after {
     right: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     z-index: 100;
 }
 
 .control-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 2px solid rgba(180, 50, 50, 0.4);
-    background: rgba(15, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
-    color: var(--content-color);
-    font-size: 24px;
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(135deg, rgba(180, 50, 50, 0.15) 0%, rgba(100, 20, 20, 0.25) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(180, 50, 50, 0.2);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.control-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 100, 100, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.control-btn:hover::before {
+    opacity: 1;
 }
 
 .control-btn:hover {
-    transform: scale(1.1);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 20px rgba(180, 50, 50, 0.4);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 12px 40px rgba(180, 50, 50, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 0 1px var(--primary-color),
+        0 0 30px rgba(180, 50, 50, 0.3);
+    background: linear-gradient(135deg, rgba(180, 50, 50, 0.25) 0%, rgba(100, 20, 20, 0.35) 100%);
+}
+
+.control-btn:active {
+    transform: translateY(-2px) scale(1.02);
+    transition: all 0.1s ease;
+}
+
+.btn-icon {
+    font-size: 28px;
+    line-height: 1;
+    transition: transform 0.3s ease;
+}
+
+.control-btn:hover .btn-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.btn-label {
+    font-family: var(--font-button);
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+}
+
+.control-btn:hover .btn-label {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Active state indicator */
+.control-btn.active {
+    background: linear-gradient(135deg, rgba(255, 100, 100, 0.3) 0%, rgba(180, 50, 50, 0.4) 100%);
+    box-shadow: 
+        0 8px 32px rgba(180, 50, 50, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 0 2px var(--primary-color),
+        inset 0 0 20px rgba(255, 100, 100, 0.2);
+}
+
+.control-btn.active .btn-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
 
 /* === MAIN CONTAINER === */
@@ -381,7 +472,7 @@ body::after {
 
 /* === TITLE === */
 .title {
-    font-family: 'Shadows Into Light', 'Caveat', cursive;
+    font-family: var(--font-title);
     font-size: calc(clamp(2.2rem, 7vw, 5rem) * var(--text-size));
     text-align: center;
     margin-bottom: clamp(20px, 4vw, 35px);
@@ -397,7 +488,18 @@ body::after {
     animation: titlePulse 4s ease-in-out infinite;
     position: relative;
     z-index: 1;
-    transition: font-size 0.3s ease;
+    transition: font-size 0.3s ease, font-family 0.5s ease;
+}
+
+/* Modern font adjustments */
+body[data-font="modern"] .title {
+    letter-spacing: 0.15em;
+    font-weight: 400;
+}
+
+body[data-font="elegant"] .title {
+    letter-spacing: 0.05em;
+    font-weight: 500;
 }
 
 @keyframes titlePulse {
@@ -407,7 +509,7 @@ body::after {
 
 /* === DAILY NOTE === */
 .daily-note {
-    font-family: 'Caveat', cursive;
+    font-family: var(--font-body);
     font-size: calc(clamp(0.9rem, 2vw, 1.1rem) * var(--text-size));
     text-align: center;
     color: rgba(255, 200, 150, 0.8);
@@ -418,11 +520,12 @@ body::after {
     border: 1px solid rgba(255, 150, 100, 0.1);
     font-style: italic;
     animation: fadeIn 1s ease-out;
+    transition: font-family 0.5s ease;
 }
 
 /* === CONTENT === */
 .content {
-    font-family: 'Caveat', cursive;
+    font-family: var(--font-body);
     font-size: calc(clamp(1.25rem, 3.2vw, 1.65rem) * var(--text-size));
     line-height: 1.85;
     margin-bottom: clamp(25px, 5vw, 35px);
@@ -436,7 +539,20 @@ body::after {
     letter-spacing: 0.01em;
     position: relative;
     z-index: 1;
-    transition: font-size 0.3s ease, color 0.5s ease;
+    transition: font-size 0.3s ease, color 0.5s ease, font-family 0.5s ease;
+}
+
+/* Modern font adjustments */
+body[data-font="modern"] .content {
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    line-height: 1.9;
+}
+
+body[data-font="elegant"] .content {
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.9;
 }
 
 /* === CHOICES === */
@@ -451,7 +567,7 @@ body::after {
 }
 
 .choice-btn {
-    font-family: 'Caveat', cursive;
+    font-family: var(--font-button);
     font-size: calc(clamp(1.1rem, 2.8vw, 1.35rem) * var(--text-size));
     font-weight: 600;
     background: rgba(180, 30, 30, 0.08);
@@ -469,6 +585,19 @@ body::after {
     word-wrap: break-word;
     position: relative;
     overflow: hidden;
+}
+
+/* Modern font adjustments */
+body[data-font="modern"] .choice-btn {
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: calc(clamp(0.95rem, 2.5vw, 1.15rem) * var(--text-size));
+}
+
+body[data-font="elegant"] .choice-btn {
+    font-weight: 500;
+    font-style: italic;
 }
 
 .choice-btn::before {
@@ -504,8 +633,10 @@ body[data-text-size="large"] { --text-size: 1.15; }
     body { padding: 10px; }
     .container { margin-top: 35px; }
     .game-screen { padding: clamp(20px, 5vw, 30px); min-height: 420px; }
-    .controls-panel { top: 50px; right: 10px; }
-    .control-btn { width: 45px; height: 45px; font-size: 20px; }
+    .controls-panel { top: 50px; right: 10px; gap: 10px; }
+    .control-btn { width: 60px; height: 60px; border-radius: 16px; }
+    .btn-icon { font-size: 24px; }
+    .btn-label { font-size: 9px; }
 }
 
 @media (max-width: 480px) {
@@ -513,8 +644,10 @@ body[data-text-size="large"] { --text-size: 1.15; }
     .container { padding: 6px; margin-top: 30px; }
     .game-screen { padding: 18px; min-height: 380px; }
     .floating-emoji { font-size: 16px !important; }
-    .controls-panel { top: 45px; right: 5px; }
-    .control-btn { width: 40px; height: 40px; font-size: 18px; }
+    .controls-panel { top: 45px; right: 5px; gap: 8px; }
+    .control-btn { width: 55px; height: 55px; border-radius: 14px; }
+    .btn-icon { font-size: 22px; }
+    .btn-label { font-size: 8px; }
 }
 
 @media (max-width: 360px) {

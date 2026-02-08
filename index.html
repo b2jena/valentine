@@ -7,7 +7,12 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    <!-- Font Combination 1: Handwritten + Sans-serif -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Shadows+Into+Light&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Combination 2: Script + Serif -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Font Combination 3: Bold Display + Light Body -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="night" data-mood="romantic">
@@ -32,9 +37,22 @@
 
     <!-- Controls Panel -->
     <div class="controls-panel" id="controlsPanel">
-        <button class="control-btn" id="themeToggle" title="Toggle Day/Night">🌙</button>
-        <button class="control-btn" id="moodToggle" title="Change Mood">💕</button>
-        <button class="control-btn" id="textSizeToggle" title="Text Size">A</button>
+        <button class="control-btn" id="themeToggle" title="Toggle Day/Night">
+            <span class="btn-icon">🌙</span>
+            <span class="btn-label">Theme</span>
+        </button>
+        <button class="control-btn" id="moodToggle" title="Change Mood">
+            <span class="btn-icon">💕</span>
+            <span class="btn-label">Mood</span>
+        </button>
+        <button class="control-btn" id="fontToggle" title="Change Font Style">
+            <span class="btn-icon">Aa</span>
+            <span class="btn-label">Font</span>
+        </button>
+        <button class="control-btn" id="textSizeToggle" title="Text Size">
+            <span class="btn-icon">A</span>
+            <span class="btn-label">Size</span>
+        </button>
     </div>
 
     <!-- Main Container -->
