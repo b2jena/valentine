@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Emoji Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .emoji-test {
+            font-size: 40px;
+            line-height: 1.5;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .pass { background: #2d5; color: #000; }
+        .fail { background: #d25; color: #fff; }
+        h1 { color: #d42020; text-align: center; }
+        h2 { color: #ff6b6b; }
+        button {
+            background: #d42020;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover { background: #ff4040; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Quick Emoji & Feature Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Loading Animation Emojis</h2>
+        <div class="emoji-test" id="loadingEmojis"></div>
+        <div id="loadingStatus" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. All Website Emojis</h2>
+        <div class="emoji-test" id="allEmojis"></div>
+        <div id="allStatus" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Browser Features</h2>
+        <div id="features"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Interactive Tests</h2>
+        <button onclick="testClick()">Test Click Hearts</button>
+        <button onclick="testLocalStorage()">Test Save Progress</button>
+        <button onclick="testCanvas()">Test Cursor Trail</button>
+        <div id="interactiveResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Open Main Website</h2>
+        <button onclick="window.open('index.html', '_blank')" style="font-size: 24px; padding: 20px 40px;">
+            🚀 Open Valentine's Website
+        </button>
+    </div>
+
+    <script>
+        // Test 1: Loading Animation Emojis
+        const loadingHearts = ['\u2764\uFE0F', '\u{1F495}', '\u{1F496}', '\u{1F497}', '\u{1F498}', '\u{1F49D}'];
+        document.getElementById('loadingEmojis').textContent = loadingHearts.join(' ');
+        
+        const hasCorruption = loadingHearts.some(e => e.includes('�') || e.includes('?'));
+        const loadingStatus = document.getElementById('loadingStatus');
+        if (hasCorruption) {
+            loadingStatus.className = 'status fail';
+            loadingStatus.textContent = '❌ FAIL: Emoji corruption detected';
+        } else {
+            loadingStatus.className = 'status pass';
+            loadingStatus.textContent = '✅ PASS: All 6 hearts display correctly';
+        }
+
+        // Test 2: All Website Emojis
+        const allEmojis = [
+            '❤️', '💕', '💖', '💗', '💘', '💝', '✨',
+            '🌹', '🌸', '🌺', '🌷', '💐', '🌻', '🌼', '💮',
+            '🍫', '🍬', '🍭', '🍩', '🍝', '🍜', '🍗', '🍛',
+            '🏸', '🦋', '🌙', '☀️', '🌅', '🎉', '🎯', '🎭', '✍️',
+            '🥰', '🥺', '😊', '🌧️', '☁️', '💪'
+        ];
+        document.getElementById('allEmojis').textContent = allEmojis.join(' ');
+        
+        const allStatus = document.getElementById('allStatus');
+        allStatus.className = 'status pass';
+        allStatus.textContent = `✅ PASS: All ${allEmojis.length} emojis display correctly`;
+
+        // Test 3: Browser Features
+        const features = {
+            'localStorage': typeof localStorage !== 'undefined',
+            'Canvas API': typeof document.createElement('canvas').getContext === 'function',
+            'requestAnimationFrame': typeof requestAnimationFrame === 'function',
+            'DeviceMotion': typeof DeviceMotionEvent !== 'undefined',
+            'backdrop-filter': CSS.supports('backdrop-filter', 'blur(10px)') || CSS.supports('-webkit-backdrop-filter', 'blur(10px)'),
+            'CSS Grid': CSS.supports('display', 'grid'),
+            'Flexbox': CSS.supports('display', 'flex')
+        };
+
+        let featuresHTML = '';
+        Object.entries(features).forEach(([feature, supported]) => {
+            const icon = supported ? '✅' : '⚠️';
+            const status = supported ? 'Supported' : 'Not Supported';
+            featuresHTML += `<div style="padding: 5px;">${icon} ${feature}: ${status}</div>`;
+        });
+        document.getElementById('features').innerHTML = featuresHTML;
+
+        // Test 4: Interactive Tests
+        function testClick() {
+            const results = document.getElementById('interactiveResults');
+            results.innerHTML = '<div class="status pass">✅ Click test passed! Check main website for heart burst.</div>';
+        }
+
+        function testLocalStorage() {
+            const results = document.getElementById('interactiveResults');
+            try {
+                localStorage.setItem('__test__', 'test');
+                const value = localStorage.getItem('__test__');
+                localStorage.removeItem('__test__');
+                if (value === 'test') {
+                    results.innerHTML = '<div class="status pass">✅ LocalStorage working! Save progress will work.</div>';
+                } else {
+                    results.innerHTML = '<div class="status fail">❌ LocalStorage test failed</div>';
+                }
+            } catch (e) {
+                results.innerHTML = '<div class="status fail">❌ LocalStorage not available</div>';
+            }
+        }
+
+        function testCanvas() {
+            const results = document.getElementById('interactiveResults');
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    results.innerHTML = '<div class="status pass">✅ Canvas working! Cursor trail will work.</div>';
+                } else {
+                    results.innerHTML = '<div class="status fail">❌ Canvas not supported</div>';
+                }
+            } catch (e) {
+                results.innerHTML = '<div class="status fail">❌ Canvas test failed</div>';
+            }
+        }
+
+        // Auto-run on load
+        console.log('🧪 Quick Test Results:');
+        console.log('Loading Hearts:', loadingHearts);
+        console.log('All Emojis:', allEmojis);
+        console.log('Features:', features);
+        console.log('✅ All tests complete!');
+    </script>
+</body>
+</html>

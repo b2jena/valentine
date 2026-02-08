@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    VALENTINE'S WEBSITE - ENHANCED VERSION
    Features: Loading, Themes, Parallax, Cursor Trail,
    Click Hearts, Tilt, Daily Notes, Weather, Save Progress
@@ -35,7 +35,7 @@ function loadState() {
 function initLoading() {
     const loader = document.getElementById('heartLoader');
     const progress = document.getElementById('progressFill');
-    const hearts = ['❤️', '�', '�', '💗', '💘', '💝'];
+    const hearts = ['\u2764\uFE0F', '\u{1F495}', '\u{1F496}', '\u{1F497}', '\u{1F498}', '\u{1F49D}'];
     let idx = 0;
     let percent = 0;
 
@@ -686,3 +686,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     initLoading();
 });
+
