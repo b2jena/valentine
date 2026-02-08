@@ -14,13 +14,14 @@ const server = http.createServer((req, res) => {
     };
 
     const contentType = mimeTypes[extname] || 'application/octet-stream';
+    const charset = extname === '.html' || extname === '.js' || extname === '.css' ? '; charset=utf-8' : '';
 
     fs.readFile(filePath, (error, content) => {
         if (error) {
             res.writeHead(404);
             res.end('File not found');
         } else {
-            res.writeHead(200, { 'Content-Type': contentType });
+            res.writeHead(200, { 'Content-Type': contentType + charset });
             res.end(content, 'utf-8');
         }
     });
